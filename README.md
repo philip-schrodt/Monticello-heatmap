@@ -5,9 +5,17 @@ The FJTYFilt system is a series of Python programs for pre-filtering news using 
 The system uses the PLOVER data-exchange format: https://github.com/openeventdata/PLOVER; http://ploverdata.org, the spaCy
 natural language processing system, and sklearn.
 
-`mudflat` is basically a testbed for the `FJOLTYNG` coder, which will be a full-featured PLOVER coder based on 
-universal dependency parses. [`FJOLTYNG`](http://parusanalytics.com/fjoltyng/) will use a new set of JSON formats for both input and dictionaries,
-which is to say it will not be compatible with the input files of either `mudflat` or the `TABARI/PETRARCH` family of coders.
+The filter is a simple linear support-vector-machine estimated and implemented using the scikit-learn package and working off word vectors created using the spaCy NLP package. These have been processed using the following utilities
+
+spaCy is used to tokenize the text, then the words are filtered on the following criteria
+*length > 3
+*all alphabetic
+*not part of a named entity: spaCy doesn't always get these correctly
+*not in the spaCy English stop list
+
+The remaining word list is transformed into an tf/idf vector by the sklearn function TfidfVectorizer and then a multiclass SVM is estimated using LinearSVC with the default values.
+
+The training cases were developed incrementally using an older corpus using a combination of initially seeding the cases into codeable/not codeable based on whether they had generated events, then, using the program `FJTYFilt_mark_discards.py`, manually classifying about 1000 cases into the various uncodeable categories (again, developed through a couple iterations), and finally "bootstrapping" additional training cases based on classifying unknown cases and then manually reviewing these (which is gets to be quite quick since most of the classifications are correct)
 
 Filter modes
 ============
@@ -22,7 +30,7 @@ The system is configured to use the following scheme:
 5. crime
 6. accidents
 7. natural disaster
-8. [open]
+8. [open: current sample uses fisheries]
 9. no codeable content: typically links and other non-language records.
 
 A number of training cases have been provided in the file. These produce the following performance
@@ -71,43 +79,9 @@ Test set
    no codeable content |   11     0     0     0     0     0     0     0     0    60     71 (  7.47%)   84.51%   84.51%
 
 ```
-Developing training cases and estimating a model
-The filter is a simple linear support-vector-machine estimated and implemented using the scikit-learn package and working off word vectors created using the spaCy NLP package. These have been processed using the following utilities
+So, obviously, quite a few additional cases are needed in the `opinion` and `crime` categories, and `business\finance` and `accidents` could use some work as well. These addition cases can be generated using the `FJTYFilt_make_wordlists.py` program
 
-spaCy is used to tokenize the text, then the words are filtered on the following criteria
-length > 3
-all alphabetic
-not part of a named entity: spaCy doesn't always get these correctly
-not in the spaCy English stop list
-is in the spaCy vocabulary list (though I'm not entirely sure this is working)
 
-The remaining word list is transformed into an tf/idf vector by the scikit-learn function TfidfVectorizer and then a multiclass SVM is estimated using LinearSVC with the default values.
-
-The training cases were developed incrementally (and basically twice, as the character of the input stream changed dramatically sometime in late January) using a combination of initially seeding the cases into codeable/not codeable based on whether they had generated events, then, using the program mark_discards.py, manually classifying about 1000 cases into the various uncodeable categories (again, developed through a couple iterations), and finally "bootstrapping" additional training cases based on classifying unknown cases and then manually reviewing these (which is gets to be quite quick since most of the classifications are correct)
-.stories.txt files
-These files extract the title and story text from the original newsml-formatted input, and remove the html markup. They are human-readable—albeit with paragraph breaks have been removed—and are used in subsequent processing steps.
-
-The format:
-=+=+  : start of story
-directory and file name url of original .xml file (in the docs this is called a "url" but really isn't)
-Title: <title of article>
-story text text-wrapped to lines < 128 chars
-blank line
-.wordlist.txt files
-These contain an optional classification and the filtered word lists that will be the input to the SVM, as well as additional statistics about the text, the url and the title. The format is a bit quirky—hey, it's research software—but basically is
-
-1-character category
-space
-list (in []) of words
-space
-tuple (in ()) of [well, what is it]
-space
-file identifier
- =+= Title:
-story title
-
-split_stories.py
-Takes a pair of input texts and json files (and a list of the json) and sorts these into "discard." and "eventext." categories, getting a clean version of the story text. File suffix is ".stories.txt" Currently selects just EN
 
 
 extract_stories.py
@@ -128,10 +102,6 @@ This has not been tested extensively.
 
 
 make_labeled_wordlists.py 
-Produce labelled word vectors based on the mark_discards.py output. Program has three command-line options
-<classed-files-name> <story-file-name> : names of the  mark_discards.py output and the corresponding .stories.txt file
-<output-file-prefix>: Output file is named <output-file-prefix> + "wordlists.txt" (otherwise default; this must be the final option)
-There is a hard-coded list include in the program which can be used to include only categories in that list; the default is to include all categories '0' through '9'.
 
 
 make_wordlists_nolabel.py 
@@ -139,7 +109,36 @@ Produce unlabelled (first char '-') word vectors from every record in a ".storie
 
 
 SVM_filter_estimate.py 
-Estimate and save models. This was originally configured to read a list of multiple input files and some output file names, but I've ended up using it with just a single file and the default outputs
+
+
+Prerequisites
+-------------
+
+The current programs are about half-way between research and operational: file names and directories are, for the most part, 
+hard-coded in the program, but it would be relatively straightforward to replace this with command-line options (see, for 
+example, those implemented in `FILL THIS IN`) so they could be used in a scripted pipeline
+
+Files
+=====
+
+All programs are Python 3.7 and open source under the MIT License.
+
+utilFJML.py
+------------
+Utility routines for the FJOLTYNG-ML system: the only routine used from this is `utilFJML.read_file`, which is a generic
+routine for reading *.jsonl* files.
+
+FJTYFilt_make_wordlists.py
+----------
+Produce word vectors based on the mark\_discards.py output. Program has three command-line options
+<classed-files-name> <story-file-name> : names of the  mark\_discards.py output and the corresponding .stories.txt file
+<output-file-prefix>: Output file is named <output-file-prefix> + "wordlists.txt" (otherwise default; this must be the final option)
+There is a hard-coded list include in the program which can be used to include only categories in that list; the default is to include all categories '0' through '9'.
+
+FJTYFilt_estimator.py
+-------------
+Estimate and save models using the sklearn modules: input and output formats are hard coded.
+
 TEST_RESULT_FILE_NAME = "SVM_test_results.txt"  (saves a copy of the train/test results)
 VECTORZ_PFILE_NAME = "save.vectorizer.p"  (pickled vectorizer)
 MODEL_PFILE_NAME = "save.lin_clf.p" (pickled SVM)
@@ -149,25 +148,10 @@ A classification matrix is displayed, followed by these percentages:
 category as a percent of all cases
 accuracy in classifying the category (main diagonal entry/total)
 accuracy in classifying the category as codeable or not (1 - (category-0/total))
-Command line options:
--f <file_name> : get input from <file_name>
--I <file_list_name>: get input from a file structured as
-one or more input file names
-======
-TEST_RESULT_FILE_NAME
-VECTORZ_PFILE_NAME
-MODEL_PFILE_NAME
-If "-----" is the first line, just use the file specified by -f or the default; do not use the "====" separator
-If "-----" occurs after "======", use the defaults, e.g. a file using default names would look like 
-list0215.wordlists.txt
-list0218.wordlists.txt
-=============
-----------
-----------
-----------
 
 
-classify_unlabelled.py 
+FJTYFilt_evaluate.py
+--------------------
 This program is used to find additional candidate cases from an unclassified set of wordlists. Reads pickled files for a vectorized and model that were generated by SVM_filter_estimate.py then classifies case-word vectors from the file INPUT_FILE_NAME which was generated by make_wordlists_nolabel.py. If the prediction corresponds to MODE, writes the urls of the case to screen and a file OUTPUT_PREFIX + "." + str(MODE) + ".urls.txt". 
 The command option -wp writes the wordlists of these predicted cases to a file WORDLIST_PREFIX + "." + str(MODE) + ".wordlists.txt": this is used when these cases will be added to a training set.
 The command options -sp and -sf writes the stories of these predicted cases to a file STORY_PREFIX + "." + str(MODE) + ".stories.txt": this is used when manually reviewing the classifications.
@@ -184,53 +168,4 @@ Other utilities
 pattern_SVM_encode.py 
 Produces labelled word vectors based on a regex pattern and spaCy processing
 
-
-Prerequisites
--------------
-
-The current programs are about half-way between research and operational: file names and directories are, for the most part, 
-hard-coded in the program, but it would be relatively straightforward to replace this with command-line options (see, for 
-example, those implemented in `FILL THIS IN`) so they could be used in a scripted pipeline
-
-Files
-=====
-
-All programs are Python 3.7 and open source under the MIT License.
-
-mudflat.py
-----------
-Main driver program
-
-globals.py
--------------
-Globals, adapted from PETRARCH-2 (https://github.com/openeventdata/petrarch2)
-
-reader.py
-------------
-Configuration and dictionary input adapted from PETRARCH-2; CoNNL input
-
-coder.py
----------------
-Coding routines
-
-utilities.py
----------------
-Small utility routines, with parts adapted from PETRARCH-2
-
-CAMEO2PLOVER.txt
----------------
-PLOVER event-mode-context equivalents to CAMEO codes. Definitely a first approximation.
-
-extract_UD_parse.py
--------------------
-Utility program for experimenting with CoNLL-U format routines
-
-mudflat_testdata_Mk1.txt
-------------------------
-Records used to achieve "first light": these are actual reports, with the CoNLL-U parse generated by Stanford CoreNLP;
-actor and verb dictionaries are just the usual ones for PETRARCH-2
-
-Documentation.md
-------------------------
-Draft documentation, which is more a storage point for future elements of the documentation than a finished product
 
