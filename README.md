@@ -86,6 +86,9 @@ Prerequisites
 
 1. `spaCy` and the relevant routines from `sklearn` need to be installed.
 
+2. and both use stories (not sentences) in the PLOVER data-exchange (PDE) format: as usual, the easiest way to grok this is just look
+at the sample cases in *demo-REUT-20-02-25-wordlists.jsonl*
+
 Files
 =====
 
@@ -98,8 +101,15 @@ Utility routines for the FJOLTYNG-ML system: the only routine used from this is 
 routine for reading *.jsonl* files.
 
 
-FJTYFilt_make_wordlists.py
---------------------------
+FJTYFilt_wordlists_from_stories.py
+----------------------------------
+Reads a stories file in PDE format, filters to get rid of stop words and other likely non-words, then writes a
+list of the remaining words as a space-delimited string (per requirements of the sklearn SVM routines) to a PDE filename with "-wordlists" 
+replacing "-stories". Input file list and file path is currently hard coded
+
+
+FJTYFilt_wordlists_from_labelled_cases_.py
+----------------------------------
 Produce word vectors based on the `FJTYFilt_mark_discards.py` output. Program has three command-line options [CHECK THIS]
 
 * <classed-files-name> <story-file-name> : names of the  mark_discards.py output and the corresponding .stories.txt file
@@ -181,21 +191,33 @@ The `FJTYFilt_mark_discards.py` program below is an alternative way of doing thi
 airplanes---but does not have the machine learning component. If you are going to be doing a lot of labelling, notably in the development
 of new categories, I'd recommend `prodigy`. The two programs  `name` and `name` convert between the PLOVER and `prodigy` formats.
 
-FJTYFilt_mark_discards.py
--------------------------
-This utility is used to manually classify cases in a *.stories* file, simply going through every story in the file and waiting a key-response (no <rtn> needed):
-    0-9: enter response and info into the output file
-    space: same as '0'
-    <enter>: show the full story
-    <down-arrow>: skip to next story
-    <left-arrow>: exit program
-If an output file already exists, there will be an initial query
-"Skip previously coded (c) or skip to last (l) file -> " : which has following options
-    'c' : skip any cases already in the output file, then append new cases
-    'l' : ('el') skip to the frame following the last case that was coded in the output file, then append new cases
-    otherwise: start new output file
-This has not been tested extensively.
+FJTYFilt-plovigy.py
+-------------------
 
+This program is a subset of [`plovigy-mark.py`](https://github.com/openeventdata/plovigy-mark) which uses the PDE jsonl format and is a low-footprint terminal-based system for classifying discard modes. The program adds a "mode" field of the form `mode_number - mode_text`
+(for example "0-codeable", "1-sports",  "2-culture/entertainment") and overwrites the 'parser', 'coder', 'codedDate' and 'codedTime' fields.
+
+TO RUN PROGRAM:
+
+`python3 FJTYFilt-plovigy.py <filename> <coder>`
+
+where the optional <filename> is the file to read with a hard-coded default; <coder> is optional coder initials.
+
+KEYS
+
+* 0-9       add mode to the record and write     
+* *+/space   skip: typically used when duplicates are recognized
+* q         quit 
+
+PROGRAMMING NOTES:
+
+1. The file FILEREC_NAME keeps track of the location in the file.
+
+2. Output file names replaces "-stories" with "-labelled" and adds a time-stamp
+
+3. Key input is not case-sensitive
+
+4. With the current settings, the program uses a window 148W x 48H, measured in *characters* (not pixels)
 
 
 
