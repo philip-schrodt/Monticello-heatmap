@@ -176,12 +176,12 @@ Sample input for `FJTYFilt_evaluate.py`
 *prodigy* and other classification utilities
 ===================
 
-An article on machine learning in ]*The Economist*](https://www.economist.com/technology-quarterly/2020/01/02/chinas-success-at-ai-has-relied-on-good-data) in late 2019 made the interesting observation that China's success in this area rests
-not on new algorithms---they use the same open source tools everyone else uses---but on their ability to quickly and inexpensively 
+An article on machine learning in [*The Economist*](https://www.economist.com/technology-quarterly/2020/01/02/chinas-success-at-ai-has-relied-on-good-data) in late 2019 made the interesting observation that China's success in this area rests
+not on new algorithms---they use the same open source tools everyone else uses&mdash;but on their ability to quickly and inexpensively 
 generate very large numbers of labelled training cases: an entire industry has arisen in China to do this.
 
 This is also the insight behind the [explosion.ai](https://explosion.ai/) program [`prodigy`](https://prodi.gy/): enable a user or small team to rapidly 
-label/classify training cases. `prodigy` is proprietary software but explosion.ai has certainly made far more than their share of contributions 
+label/classify training cases. And without the inconveniences of market authitarianism.  `prodigy` is proprietary software but explosion.ai has certainly made far more than their share of contributions 
 to open source---`spaCy` for godsakes!---and this is a place where the investment might be well worthwhile. The key contribution of
 `prodigy` is the integration of a machine-learning algorithm which, well, "learns" the correct classification of your cases, so pretty
 soon you are simply approving its decisions rather than having to think: this allows classification to go *very* fast.
