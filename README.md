@@ -98,20 +98,6 @@ utilFJML.py
 Utility routines for the FJOLTYNG-ML system: the only routine used from this is `utilFJML.read_file`, which is a generic
 routine for reading *.jsonl* files.
 
-mark_discards.py
-----------------
-This utility is used to manually classify cases in a .stories file, simply going through every story in the file and waiting a key-response (no <rtn> needed):
-    0-9: enter response and info into the output file
-    space: same as '0'
-    <enter>: show the full story
-    <down-arrow>: skip to next story
-    <left-arrow>: exit program
-If an output file already exists, there will be an initial query
-"Skip previously coded (c) or skip to last (l) file -> " : which has following options
-    'c' : skip any cases already in the output file, then append new cases
-    'l' : ('el') skip to the frame following the last case that was coded in the output file, then append new cases
-    otherwise: start new output file
-This has not been tested extensively.
 
 FJTYFilt_make_wordlists.py
 --------------------------
@@ -119,6 +105,7 @@ Produce word vectors based on the mark_discards.py output. Program has three com
 <classed-files-name> <story-file-name> : names of the  mark_discards.py output and the corresponding .stories.txt file
 <output-file-prefix>: Output file is named <output-file-prefix> + "wordlists.txt" (otherwise default; this must be the final option)
 There is a hard-coded list include in the program which can be used to include only categories in that list; the default is to include all categories '0' through '9'.
+
 
 FJTYFilt_estimator.py
 ---------------------
@@ -131,9 +118,10 @@ Estimate and save models using the `sklearn` modules: input and output formats a
 The program first does N_EXPERIMENTS (currently set at 5) train/test experiments at a 1:2 ratio (that is, model is estimated on one-third of the cases and tested on the remaining two-thirds): these results are shown on the screen and saved in the file TEST_RESULT_FILE_NAME/ The model which is saved is estimated using all of the cases.
 
 A classification matrix is displayed, followed by these percentages:
-category as a percent of all cases
-accuracy in classifying the category (main diagonal entry/total)
-accuracy in classifying the category as codeable or not (1 - (category-0/total))
+
+* category as a percent of all cases
+* accuracy in classifying the category (main diagonal entry/total)
+* accuracy in classifying the category as codeable or not (1 - (category-0/total))
 
 
 FJTYFilt_evaluate.py
@@ -161,7 +149,7 @@ Supporting files
 
 FJTY_training_wordlists.zip
 ---------------------------
-Set of training cases: most of these are mode-specific; the remaining two are a mixed set produced using `mark\_discards.py`
+Set of training cases: most of these are mode-specific; the remaining two are a mixed set produced using `NAME.py`
 
 
 FJTY_SVM_Models.zip
@@ -173,22 +161,39 @@ demo-REUT-20-02-25-wordlists.jsonl
 ----------------------------------
 Sample input for `FJTYFilt_evaluate.py`
 
+
+
 *prodigy* and other classification utilities
-===================
+============================================
 
 An article on machine learning in [*The Economist*](https://www.economist.com/technology-quarterly/2020/01/02/chinas-success-at-ai-has-relied-on-good-data) in late 2019 made the interesting observation that China's success in this area rests
-not on new algorithms---they use the same open source tools everyone else uses&mdash;but on their ability to quickly and inexpensively 
+not on new algorithms&mdash;Chinese machine learn enterprises use the same open source tools everyone else uses&mdash;but on their ability to quickly and inexpensively 
 generate very large numbers of labelled training cases: an entire industry has arisen in China to do this.
 
 This is also the insight behind the [explosion.ai](https://explosion.ai/) program [`prodigy`](https://prodi.gy/): enable a user or small team to rapidly 
-label/classify training cases. And without the inconveniences of market authitarianism.  `prodigy` is proprietary software but explosion.ai has certainly made far more than their share of contributions 
-to open source---`spaCy` for godsakes!---and this is a place where the investment might be well worthwhile. The key contribution of
+label/classify training cases. And without the inconveniences of market authoritarianism.  `prodigy` is proprietary software but explosion.ai has certainly made far more than their share of contributions 
+to open source&mdash;`spaCy` for godsakes!&mdash;and this is a place where the investment might be well worthwhile. The key contribution of
 `prodigy` is the integration of a machine-learning algorithm which, well, "learns" the correct classification of your cases, so pretty
 soon you are simply approving its decisions rather than having to think: this allows classification to go *very* fast.
 
-The `NAME` program below is an alternative way of doing this---it has a very small footprint, is keyboard based, and works well on 
+The `FJTYFilt_mark_discards.py` program below is an alternative way of doing this&mdash;it has a very small footprint, is keyboard based, and works well on 
 airplanes---but does not have the machine learning component. If you are going to be doing a lot of labelling, notably in the development
 of new categories, I'd recommend `prodigy`. The two programs  `name` and `name` convert between the PLOVER and `prodigy` formats.
+
+FJTYFilt_mark_discards.py
+-------------------------
+This utility is used to manually classify cases in a *.stories* file, simply going through every story in the file and waiting a key-response (no <rtn> needed):
+    0-9: enter response and info into the output file
+    space: same as '0'
+    <enter>: show the full story
+    <down-arrow>: skip to next story
+    <left-arrow>: exit program
+If an output file already exists, there will be an initial query
+"Skip previously coded (c) or skip to last (l) file -> " : which has following options
+    'c' : skip any cases already in the output file, then append new cases
+    'l' : ('el') skip to the frame following the last case that was coded in the output file, then append new cases
+    otherwise: start new output file
+This has not been tested extensively.
 
 
 
