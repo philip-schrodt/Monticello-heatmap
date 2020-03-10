@@ -29,7 +29,7 @@ The system is configured to use the following scheme:
 5. crime
 6. accidents
 7. natural disaster
-8. [open: current sample uses fisheries]
+8. [open: current sample uses fisheries] COVID-19
 9. no codeable content: typically links and other non-language records; the corpus from which the initial training cases were derived had quite a bit of pure junk in it.
 
 A number of training cases have been provided in the file `FJTY_training_wordlists.zip`. These produce the following performance
@@ -108,16 +108,6 @@ list of the remaining words as a space-delimited string (per requirements of the
 replacing "-stories". Input file list and file path is currently hard coded
 
 
-FJTYFilt_wordlists_from_labelled_cases_.py
-----------------------------------
-Produce word vectors based on the `FJTYFilt_mark_discards.py` output. Program has three command-line options [CHECK THIS]
-
-* <classed-files-name> <story-file-name> : names of the  mark_discards.py output and the corresponding .stories.txt file
-* <output-file-prefix>: Output file is named <output-file-prefix> + "wordlists.txt" (otherwise default; this must be the final option)
-
-There is a hard-coded list include in the program which can be used to include only categories in that list; the default is to include all categories '0' through '9'.
-
-
 FJTYFilt_estimator.py
 ---------------------
 Estimate and save models using the `sklearn` modules: input and output formats are hard coded.
@@ -187,7 +177,7 @@ to open source&mdash;`spaCy` for godsakes!&mdash;and this is a place where the i
 `prodigy` is the integration of a machine-learning algorithm which, well, "learns" the correct classification of your cases, so pretty
 soon you are simply approving its decisions rather than having to think: this allows classification to go *very* fast.
 
-The `FJTYFilt_mark_discards.py` program below is an alternative way of doing this&mdash;it has a very small footprint, is keyboard based, and works well on 
+The `FJTYFilt-plovigy.py` program below is an alternative way of doing this&mdash;it has a very small footprint, is keyboard based, and works well on 
 airplanes---but does not have the machine learning component. If you are going to be doing a lot of labelling, notably in the development
 of new categories, I'd recommend `prodigy`. The two programs  `name` and `name` convert between the PLOVER and `prodigy` formats.
 
@@ -197,17 +187,34 @@ FJTYFilt-plovigy.py
 This program is a subset of [`plovigy-mark.py`](https://github.com/openeventdata/plovigy-mark) which uses the PDE jsonl format and is a low-footprint terminal-based system for classifying discard modes. The program adds a "mode" field of the form `mode_number - mode_text`
 (for example "0-codeable", "1-sports",  "2-culture/entertainment") and overwrites the 'parser', 'coder', 'codedDate' and 'codedTime' fields.
 
-TO RUN PROGRAM:
+### TO RUN PROGRAM:
 
-`python3 FJTYFilt-plovigy.py <filename> <coder>`
+`python3 FJTYFilt-plovigy.py filename coder`
 
-where the optional <filename> is the file to read with a hard-coded default; <coder> is optional coder initials.
+where the optional `filename` is the file to read with a hard-coded default; `coder` is optional coder initials.
 
-KEYS
+### KEYS
 
 * 0-9       add mode to the record and write     
 * *+/space   skip: typically used when duplicates are recognized
 * q         quit 
+
+### AUTOCODING 
+
+An autocoding file consists of a set of lines in the format
+
+  `<mode#>-<mode_text>: <comma delimited list of phrases>`
+  
+#### Example:
+```
+0-codeable-auto: Trump, Xi, WHO
+8-covid-19: coronavirus, covid-19, COVID-19
+3-gold-prices: Gold prices
+````
+
+Autocoding checks the first `AUTO_WINDOW` characters in the text and if a phrase is found, the `mode` is set to `<mode#>-<mode_text>`` 
+and the record is written without pausing. The lists are checked in order, so for example a text "Xi said China had the coronavirus
+under control" would have a mode of `0-codeable-auto`, not `8-covid-19`.
 
 PROGRAMMING NOTES:
 
@@ -218,6 +225,28 @@ PROGRAMMING NOTES:
 3. Key input is not case-sensitive
 
 4. With the current settings, the program uses a window 148W x 48H, measured in *characters* (not pixels)
+
+4. Currently the program is using integers for the mode, which obviously restricts these to 10 in number. It is easy to 
+   modify this to use other one-key alternatives, e.g. A, B, C,..., or if you are using a keypad, +, -, *, ... and then
+   change the `FJTYFilt_wordlists.py` program to adjust for this.
+   
+5. AUTO_WINDOW is currently a constant but it would be easy to modify the program so this could be set in the autofile lists,
+   e.g. something like
+            ```
+            0-codeable-auto: 128: Trump, Xi, WHO
+            8-covid-19: 256: coronavirus, covid-19, COVID-19
+            3-gold-prices: 32: Gold prices
+            ```
+
+
+FJTYFilt_wordlists_from_labelled_cases_.py
+------------------------------------------
+Produce word vectors based on the `FJTYFilt-plovigy.py` output. Program has three command-line options [CHECK THIS]
+
+* <classed-files-name> <story-file-name> : names of the  mark_discards.py output and the corresponding .stories.txt file
+* <output-file-prefix>: Output file is named <output-file-prefix> + "wordlists.txt" (otherwise default; this must be the final option)
+
+There is a hard-coded list include in the program which can be used to include only categories in that list; the default is to include all categories '0' through '9'.
 
 
 
