@@ -16,6 +16,11 @@ The remaining word list is transformed into an tf/idf vector by the [sklearn](ht
 
 The training cases were developed incrementally using an older corpus using a combination of initially seeding the cases into codeable/not codeable based on whether they had generated events, then, using the program `FJTYFilt_mark_discards.py`, manually classifying about 1000 cases into the various uncodeable categories (again, developed through a couple iterations), and finally "bootstrapping" additional training cases based on classifying unknown cases and then manually reviewing these (which is gets to be quite quick since most of the classifications are correct). 
 
+The current programs are about half-way between research and operational, as the original codebase was from a pipeline in project that never quite made it to operational status. File names and directories are, for the most part, 
+hard-coded in the program, but it would be relatively straightforward to replace this with command-line options (see, for 
+example, those implemented in `FJTYFilt_evaluate.py`) so they could be used in a scripted pipeline
+
+
 Filter modes
 ============
 
@@ -109,14 +114,14 @@ replacing "-stories". Input file list and file path is currently hard coded
 
 #### TO RUN PROGRAM: 
 
-`python3 FJTYFilt_wordlists_from_stories.py <-f filename> <-c filename> <- filename>`
+`python3 FJTYFilt_wordlists_from_stories.py <-f filename> <-c filename> <-o filename>`
 
 where 
 
 * -f: read a simple list of file names, one name per line
 * -c: read a list of file names from the *FJTY.plovigy.filerecs.txt* output of `FJTY.plovigy.py`, so the file name is the fourth item in
     a space-limited string
-* -o: output file name; otherwise set based on name of first input file
+* -o: output file name; otherwise this is based on name of first input file
 
 
 FJTYFilt_estimator.py
@@ -181,7 +186,7 @@ Sample input for `FJTYFilt_evaluate.py`
 ============================================
 
 An article on machine learning in [*The Economist*](https://www.economist.com/technology-quarterly/2020/01/02/chinas-success-at-ai-has-relied-on-good-data) in late 2019 made the interesting observation that China's success in this area rests
-not on new algorithms&mdash;Chinese machine learn enterprises use the same open source tools everyone else uses&mdash;but on their ability to quickly and inexpensively 
+not on new algorithms&mdash;Chinese machine learning enterprises use the same open source tools everyone else uses&mdash;but on their ability to quickly and inexpensively 
 generate very large numbers of labelled training cases: an entire industry has arisen in China to do this.
 
 This is also the insight behind the [explosion.ai](https://explosion.ai/) program [`prodigy`](https://prodi.gy/): enable a user or small team to rapidly 
@@ -191,7 +196,7 @@ to open source&mdash;`spaCy` for godsakes!&mdash;and this is a place where the i
 soon you are simply approving its decisions rather than having to think: this allows classification to go *very* fast.
 
 The `FJTYFilt-plovigy.py` program below is an alternative way of doing this&mdash;it has a very small footprint, is keyboard based, and works well on 
-airplanes---but does not have the machine learning component. If you are going to be doing a lot of labelling, notably in the development
+airplanes&mdash;but does not have the machine learning component. If you are going to be doing a lot of labelling, notably in the development
 of new categories, I'd recommend `prodigy`. You will need to write a couple programs (and if so, *please, please* post them to this repo!) 
 to go between the PDE and `prodigy` formats&mdash;and also note that `prodigy` uses the term "jsonl" to refer to a file with one JSON 
 record per line, not the more expansive and human-readable format used in this project&mdash;but hey, 80% to 90% of data-science is
@@ -210,7 +215,7 @@ This program is a subset of [`plovigy-mark.py`](https://github.com/openeventdata
 where the options are pairs as follows:
 
 * -f <filename>    file to read (required)
-* -c <coder>       optional coder identification (defaults to Parus Analytics)
+* -c <coder>       optional coder identification (defaults to a hard-coded value, e.g. "Parus Analytics"")
 * -a <filename>    optional filename for autocoding lists
 
 
@@ -233,15 +238,15 @@ An autocoding file consists of a set of lines in the format
 3-gold-prices: Gold prices
 ````
 
-Autocoding checks the first `AUTO_WINDOW` characters in the text and if a phrase is found, the `mode` is set to `<mode#>-<mode_text>`` 
+Autocoding checks the first `AUTO_WINDOW` characters in the text and if a phrase (these are case-sensitive) is found, the `mode` is set to `<mode_number>-<mode_text>` 
 and the record is written without pausing. The lists are checked in order, so for example a text "Xi said China had the coronavirus
 under control" would have a mode of `0-codeable-auto`, not `8-covid-19`.
 
 #### PROGRAMMING NOTES:
 
-1. The file FILEREC_NAME keeps track of the location in the file.
+1. The file FILEREC_NAME keeps track of the location in the file, output file name (which has a date-time suffix) and other information.
 
-2. Output file names replaces "-stories" with "-labelled" and adds a time-stamp
+2. Output file names replaces "-stories" with "-labelled" and adds a date-time-stamp
 
 3. Key input is not case-sensitive
 
@@ -249,7 +254,7 @@ under control" would have a mode of `0-codeable-auto`, not `8-covid-19`.
 
 4. Currently the program is using integers for the mode, which obviously restricts these to 10 in number. It is easy to 
    modify this to use other one-key alternatives, e.g. A, B, C,..., or if you are using a keypad, +, -, *, ... and then
-   change the `FJTYFilt_wordlists.py` program to adjust for this.
+   change the `FJTYFilt_estimator.py` program to adjust for this.
    
 5. AUTO_WINDOW is currently a constant but it would be easy to modify the program so this could be set in the autofile lists,
    e.g. something like
@@ -268,12 +273,5 @@ plover2prodigy.py
 -----------------
 Your file here!
 
-Additional notes
-================
 
-1. The current programs are about half-way between research and operational: file names and directories are, for the most part, 
-hard-coded in the program, but it would be relatively straightforward to replace this with command-line options (see, for 
-example, those implemented in `FJTYFilt_evaluate.py`) so they could be used in a scripted pipeline
-
-2. MAKE A NOTE on configuring a pipeline to avoid running spaCy twice.
 
