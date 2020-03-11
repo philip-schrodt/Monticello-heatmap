@@ -157,7 +157,7 @@ Output file has the form
 
 #### TO RUN PROGRAM: 
 
-`python3 FJTYFilt_evaluate.py -m <mode> [optional command pairs]`
+`python3 FJTYFilt_evaluate.py [optional command pairs]`
 
 Example for filtering sport stories:
 ```
