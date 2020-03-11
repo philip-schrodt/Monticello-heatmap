@@ -16,9 +16,10 @@ The remaining word list is transformed into an tf/idf vector by the [sklearn](ht
 
 The training cases were developed incrementally using an older corpus using a combination of initially seeding the cases into codeable/not codeable based on whether they had generated events, then, using the program `FJTYFilt_mark_discards.py`, manually classifying about 1000 cases into the various uncodeable categories (again, developed through a couple iterations), and finally "bootstrapping" additional training cases based on classifying unknown cases and then manually reviewing these (which is gets to be quite quick since most of the classifications are correct). 
 
-The current programs are about half-way between research and operational, as the original codebase was from a pipeline in project that never quite made it to operational status. File names and directories are, for the most part, 
-hard-coded in the program, but it would be relatively straightforward to replace this with command-line options (see, for 
-example, those implemented in `FJTYFilt_evaluate.py`) so they could be used in a scripted pipeline
+The current programs are about half-way between research and operational, as the original codebase was from a pipeline for a project that never quite made it to operational status. File names and directories are, for the most part, 
+hard-coded in the program, but it would be relatively straightforward to replace these with command-line options (see, for 
+example, those implemented in `FJTYFilt_evaluate.py`) so they could be used in a scripted pipeline. Error-checking, for example for 
+missing files, has also not been fully implemented.
 
 
 Filter modes
@@ -34,53 +35,55 @@ The system is configured to use the following scheme:
 5. crime
 6. accidents
 7. natural disaster
-8. [open: current sample uses fisheries] COVID-19
+8. [open: current sample uses COVID-19]
 9. no codeable content: typically links and other non-language records; the corpus from which the initial training cases were derived had quite a bit of pure junk in it.
 
 A number of training cases have been provided in the file `FJTY_training_wordlists.zip`. These produce the following performance
 
 ```
 SVM_FILTER_ESTIMATE.PY TRAIN/TEST RESULTS
-Run datetime: 20-03-07 09:21:56
+Run datetime: 20-03-11 10:10:04
 Training cases proportion: 0.330
 Training files
-INPUT_DIR: ../Bootstrap-Filter-copy/
-  list0215-wordlists.jsonl
-  list0218-wordlists.jsonl
+FILE_PATH: ../FJML-Filter/FJTY_training_wordlists
   SportOne-wordlists.jsonl
-  JunkNine-wordlists.jsonl
+  CultTwo-wordlists.jsonl
+  BusFinThree-wordlists.jsonl
+  OpinFour-wordlists.jsonl
   CrimeFive-wordlists.jsonl
   AcciSix-wordlists.jsonl
   WeathrSeven-wordlists.jsonl
-  CultTwo-wordlists.jsonl
-  OpinFour-wordlists.jsonl
+  CovidEight-wordlists.jsonl
+  JunkNine-wordlists.jsonl
+  list0215-wordlists.jsonl
+  list0218-wordlists.jsonl
 
        ============ Experiment 1 ============
-Time to estimate: 0.057 sec
+Time to estimate: 0.062 sec
 Training set
-0 |  118     0     0     0     0     0     0     0     0     0    100.00
-1 |    0   157     0     0     0     0     0     0     0     0    100.00
-2 |    0     0    65     0     0     0     0     0     0     0    100.00
-3 |    0     0     0    60     0     0     0     0     3     0    95.24
-4 |    1     0     0     0     5     0     0     0     0     0    83.33
-5 |    0     0     0     0     0     3     0     0     0     0    100.00
-6 |    0     0     0     0     0     0     9     0     0     0    100.00
-7 |    0     0     0     0     0     0     0    10     0     0    100.00
-8 |    0     0     0     0     0     0     0     0    10     0    100.00
-9 |    1     0     0     0     0     0     0     0     0    32    96.97
+0 |  136     0     0     1     0     0     0     0     0     0    99.27
+1 |    0   152     0     0     0     0     0     0     0     0    100.00
+2 |    0     0    64     0     0     0     0     0     0     0    100.00
+3 |    0     0     0    89     0     0     0     0     2     0    97.80
+4 |    1     0     0     0     7     0     0     0     0     0    87.50
+5 |    1     0     0     0     0     5     0     0     0     0    83.33
+6 |    0     0     0     0     0     0     6     0     0     0    100.00
+7 |    0     0     0     0     0     0     0    12     0     0    100.00
+8 |    0     0     0     0     0     0     0     0    37     0    100.00
+9 |    2     0     0     0     0     0     0     0     0    34    94.44
 
-Time to fit 950 cases 0.126 sec
+Time to fit 1070 cases 0.145 sec
 Test set
-              codeable |  233     3     6     8     0     0     0     0     0     1    251 ( 26.42%)   92.83%   92.83%
-                sports |    2   264     0     1     0     0     0     0     0     0    267 ( 28.11%)   98.88%   99.25%
- culture/entertainment |   13     7   119     5     0     0     0     0     0     0    144 ( 15.16%)   82.64%   90.97%
-      business/finance |   26     3     6    93     0     0     0     0     8     0    136 ( 14.32%)   68.38%   80.88%
-               opinion |   10     0     1     2     1     0     0     0     0     0     14 (  1.47%)    7.14%   28.57%
-                 crime |   15     1     3     0     0     0     1     0     0     0     20 (  2.11%)    0.00%   25.00%
-             accidents |    2     0     2     0     0     0     6     1     0     0     11 (  1.16%)   54.55%   81.82%
-      natural disaster |    1     0     0     0     0     0     0    19     0     0     20 (  2.11%)   95.00%   95.00%
-                  open |    0     0     0     3     0     0     0     0    13     0     16 (  1.68%)   81.25%  100.00%
-   no codeable content |   11     0     0     0     0     0     0     0     0    60     71 (  7.47%)   84.51%   84.51%
+              codeable |  252     1     3    12     0     0     0     1     4     0    273 ( 25.51%)   92.31%   92.31%
+                sports |    4   265     2     1     0     0     0     0     0     0    272 ( 25.42%)   97.43%   98.53%
+ culture/entertainment |   20     4   117     4     0     0     0     0     0     0    145 ( 13.55%)   80.69%   86.21%
+      business/finance |   19     1     8   149     0     0     0     0    14     1    192 ( 17.94%)   77.60%   90.10%
+               opinion |    7     0     2     2     1     0     0     0     0     0     12 (  1.12%)    8.33%   41.67%
+                 crime |   10     1     2     1     0     3     0     0     0     0     17 (  1.59%)   17.65%   41.18%
+             accidents |    9     0     1     1     0     0     3     0     0     0     14 (  1.31%)   21.43%   35.71%
+      natural disaster |    1     0     0     0     0     0     0    17     0     0     18 (  1.68%)   94.44%   94.44%
+       open [covid-19] |    0     0     0    11     0     0     0     0    48     0     59 (  5.51%)   81.36%  100.00%
+   no codeable content |   15     0     1     1     0     0     0     0     0    51     68 (  6.36%)   75.00%   77.94%
 
 ```
 So, obviously, quite a few additional cases are needed in the `opinion` and `crime` categories, and `business/finance` and `accidents` could use some work as well. These additional cases can be generated from labelled cases using the `FJTYFilt_make_wordlists.py` program.
@@ -143,7 +146,14 @@ A classification matrix is displayed, followed by these percentages:
 
 FJTYFilt_evaluate.py
 --------------------
-This program classifies new cases: it reads pickled files for a vectorized and model that were generated by `FJTYFilt_estimator.py` then classifies case-word vectors from the file `INPUT_FILE_NAME` which was generated by `FJTYFilt_make_wordlists.py`. If the prediction corresponds to MODE (command-line option *m*), it writes the urls of the case to screen and a file `OUTPUT_PREFIX + "." + str(MODE) + ".urls.txt"`. A later program is then used to merge these based on the `id` field.
+This program classifies new cases: it reads pickled files for a vectorized and model that were generated by `FJTYFilt_estimator.py` then classifies case-word vectors from the file `INPUT_FILE_NAME` which was generated by `FJTYFilt_make_wordlists.py`. If the prediction corresponds to MODE (command-line option *m*), it writes the urls of the case to screen and a file `OUTPUT_PREFIX + "." + str(MODE) + ".urls.txt"`. A later program presumably specific to your project is then used to merge these based on the `id` field.
+
+Output file has the form
+```
+{'mode': '0-codeable', 'id': 'REUT-2020-02-25-idUSKCN20J0HS', 'title': 'Malaysian king to meet all lawmakers to decide the next PM'}
+{'mode': '8-[open]', 'id': 'REUT-2020-02-25-idUSKCN20J0HH', 'title': 'China aviation regulator says flights outside of Hubei to resume gradually'}
+{'mode': '3-business/finance', 'id': 'REUT-2020-02-25-idUSKCN20J03L', 'title': 'Asian currencies arrest slide as easing expectations stall dollar'}
+```
 
 #### TO RUN PROGRAM: 
 
@@ -153,8 +163,9 @@ Example for filtering sport stories:
 ```
 FJTYFilt_evaluate.py m -1
 ```
-Command options occur in pairs -<option> <value>. -m mode is required
+Command options occur in pairs -<option> <value>. 
 
+* -m MODE: select a single mode; otherwise all modes will be included
 * -wf INPUT_FILE_NAME : name of the wordlist file of unlabelled vectors to be classified. Default: hard-coded name in program
 * -fp OUTPUT_PREFIX   : prefix for the file which lists of the urls that were predicted as being MODE. Default: "Mode"
 * -sp STORY_PREFIX    : prefix for file of stories for the cases that were predicted as being MODE: this is used when manually reviewing the classifications. Default: do not write file
